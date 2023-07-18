@@ -7,10 +7,10 @@ library(Amelia)
 library(janitor)
 
 ## preparando directorios
-dirData1 <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_limpia/SB11_20161.TXT"
-dirData2 <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_limpia/SB11_20162.TXT"
-outputDir <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_sb11_unida/SB11_2016.csv"
-outputDirTXT <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_sb11_unida/SB11_2016.txt"
+dirData1 <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_limpia/SB11_20171.TXT"
+dirData2 <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_limpia/SB11_20172.TXT"
+outputDir <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_sb11_unida/SB11_2017.csv"
+outputDirTXT <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_sb11_unida/SB11_2017.txt"
 
 ## importar data
 periodo1 <- read_delim(dirData1, 
