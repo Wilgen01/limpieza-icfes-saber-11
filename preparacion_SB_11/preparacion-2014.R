@@ -7,10 +7,10 @@ library(Amelia)
 library(janitor)
 
 ## preparando directorios
-dirData1 <- "C:/wilgen/data_limpia/SB11_20141.TXT"
-dirData2 <- "C:/wilgen/data_limpia/SB11_20142.TXT"
-outputDir <- "C:/wilgen/data_sb11_unida/SB11_2014.csv"
-outputDirTXT <- "C:/wilgen/data_sb11_unida/SB11_2014.TXT"
+dirData1 <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_limpia/SB11_20141.TXT"
+dirData2 <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_limpia/SB11_20142.TXT"
+outputDir <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_sb11_unida/SB11_2014.csv"
+outputDirTXT <- "D:/seminario/scripts/limpieza-icfes-saber-11/data_sb11_unida/SB11_2014.txt"
 
 ## importar data
 periodo1 <- read_delim(dirData1, 
@@ -28,19 +28,33 @@ periodo1$...1 <- NULL
 periodo2$...1 <- NULL
 
 ## promedia areas similares
-periodo2$punt_ciencias_sociales <- round(periodo2$PUNT_SOCIALES_CIUDADANAS+periodo1$RECAF_PUNT_LECTURA_CRITICA)
-periodo2$punt_ciencias_sociales[is.na(periodo2$punt_ciencias_sociales)] <- 0
+periodo2$punt_ciencias_sociales <- round((periodo2$PUNT_SOCIALES_CIUDADANAS+periodo2$PUNT_COMP_CIUDADANA)/2)
+periodo2$PUNT_SOCIALES_CIUDADANAS <- NULL
+periodo2$PUNT_COMP_CIUDADANA <- NULL
+
+periodo2$punt_matematicas <- round((periodo2$PUNT_MATEMATICAS+periodo2$PUNT_RAZONA_CUANTITATIVO)/2)
+periodo2$PUNT_MATEMATICAS <- NULL
+periodo2$PUNT_RAZONA_CUANTITATIVO <- NULL
+periodo2$PUNT_GLOBAL <- NULL
+
+## normalizar nombres para poder unir
+periodo1 %<>%  clean_names()
+periodo2 %<>%  clean_names()
+
+## cambiar nombre a las variables para que coincidan con años superiores
+names(periodo1)
+names(periodo1)[7] = "punt_sociales_ciudadanas"
+names(periodo1)[8] = "punt_ingles"
+names(periodo1)[9] = "punt_lectura_critica"
+names(periodo1)[10] = "punt_matematicas"
+names(periodo1)[11] = "punt_c_naturales"
+
+names(periodo2)
+names(periodo2)[10] = "punt_sociales_ciudadanas"
 
 ## unir los dos periodos
 dataUnida <- merge(periodo1, periodo2, all = T)
 
-## cambiar nombre a las variables para que coincidan con años superiores
-names(dataUnida)
-names(dataUnida)[7] = "punt_ciencias_sociales"
-names(dataUnida)[8] = "punt_ingles"
-names(dataUnida)[9] = "punt_lectura_critica"
-names(dataUnida)[10] = "punt_matematicas"
-names(dataUnida)[11] = "punt_c_naturales"
 
 ## validar datos nulos
 missmap(dataUnida)
@@ -49,12 +63,8 @@ missmap(dataUnida)
 dataUnida[is.na(dataUnida)] <- 0
 
 ## calcular puntaje global
-dataUnida$punt_global <- round((dataUnida$punt_c_naturales+dataUnida$punt_ciencias_sociales+dataUnida$punt_ingles+dataUnida$punt_lectura_critica+dataUnida$punt_matematicas)/5)
+dataUnida$punt_global <- round((dataUnida$punt_c_naturales+dataUnida$punt_sociales_ciudadanas+dataUnida$punt_ingles+dataUnida$punt_lectura_critica+dataUnida$punt_matematicas)/5)
 
-
-## normalizar nombres
-dataUnida %<>%  clean_names()
-names(dataUnida)
 
 ## separar la fecha de nacimiento
 dataUnida$Nacimeinto <- substr(dataUnida$estu_fechanacimiento, 7, 10)
@@ -63,10 +73,29 @@ dataUnida$Nacimeinto %>% class()
 
 
 ## obtener estadisticas 
-md_global<-mean(dataUnida$punt_global)
-sd_global<-sd(dataUnida$punt_global)
-dataUnida$pn_global<-round(pnorm(dataUnida$punt_global, md_global, sd_global)*100) 
-max(dataUnida$pn_global)
+md<-mean(dataUnida$punt_sociales_ciudadanas)
+sd<-sd(dataUnida$punt_sociales_ciudadanas)
+dataUnida$pn_sociales<-round(pnorm(dataUnida$punt_sociales_ciudadanas, md, sd)*100)
+
+md<-mean(dataUnida$punt_ingles)
+sd<-sd(dataUnida$punt_ingles)
+dataUnida$pn_ingles<-round(pnorm(dataUnida$punt_ingles, md, sd)*100) 
+
+md<-mean(dataUnida$punt_c_naturales)
+sd<-sd(dataUnida$punt_c_naturales)
+dataUnida$pn_naturales<-round(pnorm(dataUnida$punt_c_naturales, md, sd)*100) 
+
+md<-mean(dataUnida$punt_matematicas)
+sd<-sd(dataUnida$punt_matematicas)
+dataUnida$pn_matematicas<-round(pnorm(dataUnida$punt_matematicas, md, sd)*100) 
+
+md<-mean(dataUnida$punt_lectura_critica)
+sd<-sd(dataUnida$punt_lectura_critica)
+dataUnida$pn_lectura<-round(pnorm(dataUnida$punt_lectura_critica, md, sd)*100) 
+
+md<-mean(dataUnida$punt_global)
+sd<-sd(dataUnida$punt_global)
+dataUnida$pn_global<-round(pnorm(dataUnida$punt_global, md, sd)*100) 
 
 ## convertir txt a factor
 dataUnida %<>% mutate_if(is.character, as.factor) 
